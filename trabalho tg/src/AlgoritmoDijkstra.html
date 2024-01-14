@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algoritmo de Dijkstra</title>
+  <style>
+    body {
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        margin: 20px;
+        padding: -100px;
+        background-image: url("https://t4.ftcdn.net/jpg/06/03/43/91/360_F_603439132_0YvQ02wTr5HleRKo52PFLgDJ25NH1pRy.jpg");
+        height: max-content;
+        overflow-x: hidden;
+        
+    }
+
+    body::-webkit-scrollbar {
+        width: 0.5em;               
+    }
+
+    body::-webkit-scrollbar-track {
+        background-color: transparent;      
+    }
+
+    body::-webkit-scrollbar-thumb {
+        background-color: transparent;    
+        
+    }
+    
+
+    h1{
+        font-family: 'Courier New', Courier, monospace;
+        color:white;
+        background-color: rgb(25, 25, 94);
+        width: max;
+        height: 80px;
+        margin: -20px;
+        padding-top: 10px;
+        text-align: center;
+        font-size: 40px;
+    }
+
+    #container{
+        margin: 200px;  
+        padding: 10px;
+        padding-top: 30px;
+        padding-right: 300px;
+        padding-left: 100px;
+        width: 1000px;
+        height: 1200px;
+        border: 5px solid rgb(25, 25, 94);
+        font-size: 30px;
+        background-color: white;
+        color:rgb(25, 25, 94);
+        
+    }
+
+    #executebtt{
+        position: absolute;
+        top: 550px;
+        left: 800px;
+        font-size: 30px;
+        color: black;
+    }
+    #resultado{
+        margin: 100px;
+        padding: 50px
+        
+    }
+    #arestas,#vertices{
+        font-size: 20px;
+    }
+    #imagem{
+        border-radius: 80%;
+        width:300px;
+        height:300px;
+        margin-top:-0px;
+        padding:-10px;
+        padding-left: 1450px;
+        padding-right: 1450px;
+        margin-bottom: -400px;
+    }
+    footer{
+        background-color:rgb(25, 25, 94);
+        height: 120px;
+        width: auto;
+        margin: -20px;
+        padding-top: 30px;
+        color: #fff;
+        text-align: center;
+    }
+    ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    li{
+        display:inline-block;
+        margin: 0 10px;
+    }
+    a{
+        color: white;
+        text-decoration: none;
+    }
+  </style>
+
+</head>
+<body>
+
+<h1>Algoritmo de Dijkstra</h1>
+<img id= "imagem" src="edsger_dijkstra5-1.jpg" alt="Edsger Dijkstra">
+<div id="container">
+<ul>
+
+<li><label for="vertices">Vértices (separados por vírgula): </label>
+  <input type="text" id="vertices" placeholder="A,B,C,D,E"></li>
+</ul>
+<div>
+<ul>
+  <li><label for="arestas">Arestas e Pesos (separados por ponto e vírgula): </label>
+  <input type="text" id="arestas" placeholder="A-B-4;A-C-2;B-C-5;B-D-10;C-D-3;D-E-7"></li>
+</ul>
+</div>
+  <button id = "executebtt" onclick="executarDijkstra()">Executar Dijkstra</button>
+  <div id="resultado"></div>
+</div>
+
+<script>
+  class Grafo {
+  constructor() {
+    // array para armazenar os vértices do grafo
+    this.vertices = [];
+    // objeto para armazenar os vértices adjacentes e os pesos das arestas
+    this.adjacentes = {};
+  }
+
+  // método para adicionar um vértice ao grafo
+  addVertice(vertice) {
+    this.vertices.push(vertice);
+    // inicializa a lista de adjacentes para o vértice recém-adicionado
+    this.adjacentes[vertice] = {};
+  }
+
+  // método para adicionar uma aresta entre dois vértices com um peso associado
+  addAresta(vertice1, vertice2, peso) {
+    this.adjacentes[vertice1][vertice2] = peso;
+  }
+
+    // algoritmo de Dijkstra para encontrar o caminho mais curto e as distâncias
+  dijkstra(inicio) {
+    let distances = {}; // Armazena as distâncias dos vértices ao vértice de início
+    let pais = {}; // Armazena os pais dos vértices no caminho mais curto
+    let visitados = new Set(); // Conjunto de vértices visitados
+
+    // inicializa as distâncias e os pais para cada vértice no grafo
+  for (let i = 0; i < this.vertices.length; i++) {
+    distances[this.vertices[i]] = Infinity; // inicializa todas as distâncias como Infinity
+    pais[this.vertices[i]] = null;
+  }
+    // define a distância do vértice de início como 0
+    distances[inicio] = 0;  
+
+  let currVertice = this.vertexWithMinDistance(distances, visitados);
+
+    // compara até que todos os vértices sejam visitados
+    while (currVertice !== null) {
+    let distancia = distances[currVertice];
+    let neighbors = this.adjacentes[currVertice];
+      // atualiza as distâncias e os pais para os vértices adjacentes
+      for (let neighbor in neighbors) {
+    let newDistance = distancia + neighbors[neighbor];
+    if (distances[neighbor] > newDistance) {
+      distances[neighbor] = newDistance;
+      pais[neighbor] = currVertice;
+    }
+  }
+
+      // marca o vértice atual como visitado
+      visitados.add(currVertice);
+
+      // encontra o próximo vértice com a menor distância não visitada
+      currVertice = this.vertexWithMinDistance(distances, visitados);
+    }
+
+    // retorna as distâncias e os pais encontrados
+    return { distances, pais };
+  }
+
+  // método auxiliar para encontrar o vértice com a menor distância não visitada
+  vertexWithMinDistance(distances, visitados) {
+  let minDistance = Infinity;
+  let minVertex = null;
+  // compara sobre os vértices para encontrar o mínimo
+  for (let vertice in distances) {
+    let distancia = distances[vertice];
+    if (distancia < minDistance && !visitados.has(vertice)) {
+      minDistance = distancia;
+      minVertex = vertice;
+    }
+  }
+  // retorna o vértice com a menor distância
+  return minVertex;
+}
+
+  // metodo para encontrar o caminho mais curto dado os pais e o destino
+  caminhoMaisCurto(pais, destino) {
+    const caminho = [];
+    let vertice = destino;
+
+    // reconstrói o caminho invertido a partir do destino até o início
+    while (vertice !== null) {
+      caminho.unshift(vertice);
+      vertice = pais[vertice];
+    }
+
+    // retorna o caminho mais curto
+    return caminho;
+  }
+}
+
+// função para executar o algoritmo de Dijkstra com base na entrada do usuário
+function executarDijkstra() {
+  const verticesInput = document.getElementById('vertices').value;
+  const arestasInput = document.getElementById('arestas').value;
+
+  // converte os inputs de vértices e arestas em arrays
+  const vertices = verticesInput.split(',').map(v => v.trim());
+  const arestas = arestasInput.split(';').map(a => a.trim());
+
+  // cria um objeto Grafo
+  const grafo = new Grafo();
+
+  // adiciona vértices ao grafo
+  vertices.forEach(vertice => grafo.addVertice(vertice));
+
+  // adiciona arestas ao grafo
+  arestas.forEach(aresta => {
+    const [vertice1, vertice2, peso] = aresta.split('-');
+    grafo.addAresta(vertice1, vertice2, parseInt(peso));
+  });
+
+  // define o vértice de início como o primeiro vértice
+  const inicio = vertices[0];
+
+  // executa o algoritmo de Dijkstra e obtém as distâncias e os pais
+  const { distances, pais } = grafo.dijkstra(inicio);
+
+  // exibe o resultado na página HTML
+  const resultadoDiv = document.getElementById('resultado');
+  resultadoDiv.innerHTML = '<h3>Resultado:</h3>';
+
+  // exibe o caminho mais curto e a distância para cada vértice
+  for (const vertice in distances) {
+  const distancia = distances[vertice];
+  const caminhoMaisCurto = grafo.caminhoMaisCurto(pais, vertice);
+  const caminhoStr = caminhoMaisCurto.join(' -> ');
+  resultadoDiv.innerHTML += `<p>Caminho mais curto de ${inicio} para ${vertice}: ${caminhoStr}, Distância: ${distancia}</p>`;
+}
+}
+
+</script>
+    <footer>
+        <p>2023 - Todos os direitos reservados</p>
+        <p>Guilherme Mileib e João Gabriel</p>
+        <nav>
+            <ul>
+                <li><a href="#">Contato developer João</a></li>
+                <li><a href="https://www.instagram.com/guimileib/">Contato developer Guilherme</a></li>
+                <li><a href="https://pt.wikipedia.org/wiki/Edsger_Dijkstra">Quem é Dijkstra?</a></li>
+            </ul>
+        </nav>
+    </footer>
+</body>
+</html>
